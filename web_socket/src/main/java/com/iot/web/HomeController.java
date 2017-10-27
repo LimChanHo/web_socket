@@ -22,13 +22,5 @@ public class HomeController {
 	        logger.info("컨트롤러 접근");
 	        return "index";
 	    }
-	    
-	    @RequestMapping(value = "/chat")
-	    public String chat() {
-	        logger.info("컨트롤러 접근");
-	        return "index2";
-	    }
-	    
-	
 	
 }

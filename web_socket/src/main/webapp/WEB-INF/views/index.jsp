@@ -6,13 +6,13 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Insert title here</title>
         <script src="https://code.jquery.com/jquery-3.0.0.min.js"></script>
-        <style>
-        textarea {
-        width : 200px;
-        height : 500px;
-        }
-        </style>
     </head>
+    <style>
+    textarea {
+    width : 200px;
+    height : 600px;
+    }
+    </style>
     <body>
         <h3>웹 소켓 페이지</h3>
         <!-- 액션이 없다. -->
@@ -61,4 +61,3 @@
         }
     </script>
 </html>
-

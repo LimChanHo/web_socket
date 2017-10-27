@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
  
 @ServerEndpoint(value="/websocket")
-public class WebSocket{
+public class WebSocketController{
     
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     //접속자 관리(세션을 중복없이 일렬로 줄을 세우겠다)
@@ -22,11 +22,12 @@ public class WebSocket{
     @OnOpen
     public void onOpen(Session session) throws Exception{
         clients.add(session);
-        logger.info("서버접속 : "+session.getId());
+        logger.info("서버접속 id: "+session.getId());
         logger.info("접속자 수 : "+clients.size());
         String msg="우리 방에 오신 걸 환영 합니다.";
         systemMsg("시스템 : 새로운 사람이 입장 했습니다. 현재 접속자 수("+clients.size()+")");
         pushMessage(session,msg);
+        logger.info("session : "+session);
     }
     //서버 종료시
     @OnClose
@@ -73,4 +74,3 @@ public class WebSocket{
         }
     }
 }
-
