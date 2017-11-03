@@ -22,5 +22,11 @@ public class HomeController {
 	        logger.info("컨트롤러 접근");
 	        return "index";
 	    }
+	    
+	    @RequestMapping(value = "/index2")
+	    public String home2() {
+	        logger.info("컨트롤러 접근");
+	        return "index2";
+	    }
 	
 }

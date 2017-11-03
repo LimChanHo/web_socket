@@ -1,41 +1,40 @@
 package com.iot.web;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.websocket.OnClose;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
+import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
+
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
  
-@ServerEndpoint(value="/websocket")
+@ServerEndpoint(value="/websocket/{clientId}")
 public class WebSocketController{
     
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private Map<String, List<String>> params;
     //접속자 관리(세션을 중복없이 일렬로 줄을 세우겠다)
-    private static Set<Session> clients = Collections.synchronizedSet(new HashSet<Session>());
+    private static Map<String, Session> clients = Collections.synchronizedMap(new HashMap<String,Session>());
     //서버 접속시
     @OnOpen
-    public void onOpen(Session session) throws Exception{
-        clients.add(session);
-        logger.info("서버접속 id: "+session.getId());
-        logger.info("접속자 수 : "+clients.size());
-        String msg="우리 방에 오신 걸 환영 합니다.";
-        systemMsg("시스템 : 새로운 사람이 입장 했습니다. 현재 접속자 수("+clients.size()+")");
-        pushMessage(session,msg);
-        logger.info("session : "+session);
+    public void onOpen(@PathParam("clientId") String clientId,Session session) throws Exception{
+    	params = session.getRequestParameterMap();
+    	System.out.println(params);
+        clients.put(clientId,session);
+        System.out.println("session"+session);
     }
     //서버 종료시
     @OnClose
     public void onClose(Session session) throws Exception{
-        logger.info("서버 종료");
         clients.remove(session);
-        logger.info("접속자 수 : "+clients.size());
-        systemMsg("시스템 : 누군가가 퇴장 했습니다. 현재 접속자 수("+clients.size()+")");
     }
     //메시지 수신시(클라이언트 -> 서버)
     @OnMessage
@@ -43,18 +42,16 @@ public class WebSocketController{
         JSONParser parser = new JSONParser();
         JSONObject obj = (JSONObject) parser.parse(msg);
         logger.info("object : "+obj);
-        //{"nick":"김지훈","msg":"안녕"}
         String nick = (String) obj.get("nick");
-        String message = (String) obj.get("msg");        
-        logger.info(nick+"> "+message);        
-        String text = nick+"> "+message;
-        //순차적으로 처리하라
         synchronized(clients){
             //clients에 있는 각각의 세션을 client에 담는다.
-            for(Session client : clients){
+        	
+            for(String clientId : clients.keySet()){
+            	final Session client = clients.get("clientId");
                 //나 이외의 다른 클라이언트에게 보내는것
                 if(!client.equals(session)){//나 이외에 다른 놈들한테 보내라
-                    client.getBasicRemote().sendText(text);    
+                      logger.info("clientId" + clientId);
+                	  client.getBasicRemote().sendText(nick); 
                 }
             }
         }        
@@ -68,7 +65,8 @@ public class WebSocketController{
         //순차적으로 처리하라
         synchronized(clients){
             //clients에 있는 각각의 세션을 client에 담는다.
-            for(Session client : clients){
+            for(String clientId : clients.keySet()){
+            	final Session client = clients.get("clientId");
                 client.getBasicRemote().sendText(msg);    
             }
         }
